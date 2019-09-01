@@ -12,38 +12,36 @@
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef ELFARCH_H
-#define ELFARCH_H
 
-#if defined(__i386__)
-#define EM_THIS EM_386
-#define EL_ARCH_USES_REL
-#elif defined(__amd64__)
-#define EM_THIS EM_AMD64
-#define EL_ARCH_USES_RELA
-#elif defined(__arm__)
-#define EM_THIS EM_ARM
-#elif defined(__aarch64__)
-#define EM_THIS EM_AARCH64
-#define EL_ARCH_USES_RELA
-#define EL_ARCH_USES_REL
-#elif defined(__riscv)
-#define EM_THIS EM_RISCV
-#define EL_ARCH_USES_RELA
-#else
-#error specify your ELF architecture
-#endif
+#include "elfload.h"
 
-#if defined(__LP64__) || defined(__LLP64__)
-#define ELFSIZE 64
-#else
-#define ELFSIZE 32
-#endif
+#if defined(__riscv)
 
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#define ELFDATATHIS ELFDATA2LSB
-#else
-#define ELFDATATHIS ELFDATA2MSB
-#endif
+/*
+Note: UNTESTED! I only used static elf files.
+*/
+
+#define R_RISCV_NONE     0
+#define R_RISCV_RELATIVE 8
+
+el_status el_applyrela(el_ctx *ctx, Elf_RelA *rel)
+{
+    uint32_t *p = (uint32_t*) (rel->r_offset + ctx->base_load_vaddr);
+    uint32_t type = ELF_R_TYPE(rel->r_info);
+
+    switch (type) {
+        case R_RISCV_NONE: break;
+        case R_RISCV_RELATIVE:
+            EL_DEBUG("Applying R_RISCV_RELATIVE reloc @%p\n", p);
+            *p = rel->r_addend + ctx->base_load_vaddr;
+            break;
+        default:
+            EL_DEBUG("Bad relocation %u\n", type);
+            return EL_BADREL;
+
+    }
+
+    return EL_OK;
+}
 
 #endif

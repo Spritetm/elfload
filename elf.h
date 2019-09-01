@@ -190,6 +190,7 @@ typedef struct {
 #define EM_AMD64       62        /* AMD64 architecture */
 #define EM_VAX         75        /* DEC VAX */
 #define EM_AARCH64     183       /* ARM AArch64 */
+#define EM_RISCV       243       /* RiscV */
 
 /* Non-standard */
 #define EM_ALPHA_EXP   0x9026        /* DEC ALPHA */
